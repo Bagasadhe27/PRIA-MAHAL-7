@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
+
 class EmployeeController extends Controller
 {
     /**
@@ -110,12 +111,9 @@ class EmployeeController extends Controller
     public function edit(string $id)
     {
         $pageTitle = 'Edit Employee';
-        $positions = DB::table('positions')->get();
-        $employee = DB::table('employees')
-            ->select('*', 'employees.id as employee_id', 'positions.name as position_name')
-            ->leftJoin('positions', 'employees.position_id', 'positions.id')
-            ->where('employees.id', $id)
-            ->first();
+        // ELOQUENT
+        $positions = Position::all();
+        $employee = Employee::find($id);
 
         return view('employee.edit', compact('pageTitle', 'positions', 'employee'));
     }
@@ -125,19 +123,36 @@ class EmployeeController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        DB::table('employees')
-            ->where('id', $id)
-            ->update([
-                'firstname' => $request->input('firstName'),
-                'lastname' => $request->input('lastName'),
-                'email' => $request->input('email'),
-                'age' => $request->input('age'),
-                'position_id' => $request->input('position')
-            ]);
-        return redirect()->route('employees.index');
+        // validasi input
+        $messages = [
+            'required' => ':attribute harus diisi.',
+            'email' => 'Isi :attribute dengan format yang benar.',
+            'numeric' => 'Isi :attribute dengan angka.'
+        ];
 
+        // Validasi menggunakan Validator
+        $validator = Validator::make($request->all(), [
+            'firstName' => 'required',
+            'lastName' => 'required',
+            'email' => 'required|email',
+            'age' => 'required|numeric',
+        ], $messages);
 
-        return view('employee.index', compact('pageTitle', 'employee'));
+        // kembali ke halaman sebelumnya with error
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+         // ELOQUENT
+            $employee = Employee::find($id);
+            $employee->firstname = $request->firstName;
+            $employee->lastname = $request->lastName;
+            $employee->email = $request->email;
+            $employee->age = $request->age;
+            $employee->position_id = $request->position;
+            $employee->save();
+            return redirect()->route('employees.index');
+
     }
 
     /**
