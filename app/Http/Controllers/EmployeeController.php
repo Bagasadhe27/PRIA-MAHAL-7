@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Employee;
+use App\Models\Position;
 
 class EmployeeController extends Controller
 {
@@ -15,16 +17,9 @@ class EmployeeController extends Controller
     {
         $pageTitle = 'Employee List';
 
-        // RAW SQL QUERY
-        // $employees = DB::select('
-        //     select *, employees.id as employee_id, positions.name as position_name
-        //     from employees
-        //     left join positions on employees.position_id = positions.id
-        // ');
+        // ELOQUENT
+        $employees = Employee::all();
 
-        // Query Builder
-        $employees = DB::table('employees')->select('employees.*', 'employees.id as employee_id', 'positions.name as position_name')
-            ->join('positions', 'positions.id', '=', 'employees.position_id')->get();
         return view('employee.index', [
             'pageTitle' => $pageTitle,
             'employees' => $employees
@@ -145,11 +140,9 @@ class EmployeeController extends Controller
      */
     public function destroy(string $id)
     {
-        DB::table('employees')
-            ->where('id', $id)
-            ->delete();
+        // ELOQUENT
+        Employee::find($id)->delete();
 
         return redirect()->route('employees.index');
-
     }
 }
