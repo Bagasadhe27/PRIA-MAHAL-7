@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Employee;
+use App\Models\Position;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -37,7 +39,8 @@ class EmployeeController extends Controller
 
         // Query Builder
         $pageTitle = 'Create Employee';
-        $positions = DB::table('positions')->get();
+        // $positions = DB::table('positions')->get();
+        $positions = Position::all();
         return view('employee.create', compact('pageTitle', 'positions'));
     }
 
@@ -64,13 +67,20 @@ class EmployeeController extends Controller
         }
 
         // INSERT QUERY
-        DB::table('employees')->insert([
-            'firstname' => $request->firstName,
-            'lastname' => $request->lastName,
-            'email' => $request->email,
-            'age' => $request->age,
-            'position_id' => $request->position,
-        ]);
+        // DB::table('employees')->insert([
+        //     'firstname' => $request->firstName,
+        //     'lastname' => $request->lastName,
+        //     'email' => $request->email,
+        //     'age' => $request->age,
+        //     'position_id' => $request->position,
+        // ]);
+        $employee = new Employee;
+        $employee->firstname = $request->input('firstName');
+        $employee->lastname = $request->input('lastName');
+        $employee->email = $request->input('email');
+        $employee->age = $request->input('age');
+        $employee->position_id = $request->input('position');
+        $employee->save();
 
         return redirect()->route('employees.index');
     }
