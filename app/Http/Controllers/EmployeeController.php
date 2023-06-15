@@ -92,22 +92,14 @@ class EmployeeController extends Controller
      */
     public function show(string $id)
     {
-        $pageTitle = 'Employee Detail';
+         $pageTitle = 'Employee Detail';
 
-        // RAW SQL QUERY
-        // $employee = collect(DB::select('
-        //     select *, employees.id as employee_id, positions.name as position_name
-        //     from employees
-        //     left join positions on employees.position_id = positions.id
-        //     where employees.id = ?
-        // ', [$id]))->first();
+    // ELOQUENT
+    $employee = Employee::find($id);
 
-        // Query Builder
-        $employee = DB::table('employees')->select('employees.*', 'positions.name as position_name', 'positions.id as position_id')
-            ->leftJoin('positions', 'positions.id', '=', 'employees.position_id')
-            ->where('employees.id', $id)
-            ->first();
-        return view('employee.show', compact('pageTitle', 'employee'));
+    return view('employee.show', compact('pageTitle', 'employee'));
+
+        
     }
 
     /**
